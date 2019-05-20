@@ -2,8 +2,8 @@
 Simple command line note planner with basic commands.
 
 ## COMMANDS
-- 'create <Note Text>'
-- 'delete <ID>'
+- 'create Note_Text'
+- 'delete ID'
 - 'list'
   
 DISCLAIMER:
