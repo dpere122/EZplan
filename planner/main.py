@@ -1,8 +1,10 @@
 import datetime
 import pickle
 import os
+import tkinter as tk
+from tkinter import *
+
 class Note:
-    
     def __init__(self, noteText, dateDue):
         self.noteText = noteText
         self.dateDue = dateDue
@@ -12,75 +14,116 @@ class Note:
         return "{} is due on {}".format(self.noteText,self.dateDue)
 
 
-#Create a new note then add to list
-def newNote(nNote):
-	print("Please enter a date using this format year-month-date: ")
-	while True:
-		nDateStr = input()
-		try:
-			nDateObj = datetime.datetime.strptime(nDateStr,'%Y-%m-%d')
-			break
-		except:
-			print("ERROR: There was an error inputting the date please try again!")
-	curNote = Note(nNote,nDateObj)
-	notes.append(curNote)
-	print("Note was created and Saved!")
-	modifyList()
+class AppFrame:
 
-#Show list of notes and dates
-def showNotes():
-	if(len(notes) != 0):
-		for n in range(len(notes)):
-			print("{}: {}".format(n,notes[n].description()))
-	else:
-		print("The list is empty!")
-
-#Delete note with given ID
-def deleteNote(ID):
-	try:
-		notes.pop(ID)
-		modifyList()
-		print("Item at index {} has been deleted!".format(ID))
-	except:
-		print("ERROR: Please enter the ID of a valid Note!")
 	
+	def __init__(self):
+		self.days = []
+		self.window = tk.Tk()
+		self.window.title("EZPlanner")
+		self.window.geometry("1280x768")
+		self.window.resizable(width=False,height=False)
+		self.frame = tk.Frame(self.window)
+		self.frame.pack()
+		self.createButtons()
+		print(self.days)
+		self.window.mainloop()
 
 
-# checks if the list changed if it did then save the list back to file for changes
-def modifyList():
-	try:
-		with open(filePath,"wb") as nfp:
-			pickle.dump(notes,nfp)
-	except:
-		print("ERROR: There was an error saving your data!")
+	def createButtons(self):
+		counter = 0
+		for x in range(0,5):
+			for y in range(0,7):
+				counter +=1
+				self.labels = tk.Label(self.frame,font=("Courier",15),bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 12,height=6,text=str(counter))
+				self.labels.grid(column = y,row= x)
+				self.labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
+				self.days.append(self.labels)
+
+	# restrictions include: only one window open at a time
+	# both task and tasks of current date are shown 
+	# text input to add tasks
+	# then list view to show tasks 
+	def taskWindow(self,event,nCounter):
+		self.taskWin = Toplevel(self.window)
+		self.taskWin.geometry("300x300")
+		self.taskLabel = tk.Label(self.taskWin,text = "Task Name: ")
+		self.taskLabel.grid(column = 0,row = 0)
+		self.taskInput = tk.Entry(self.taskWin,width = 30)
+		self.taskInput.grid(column = 1,row = 0)
+		# self.days[nCounter - 1].config(text="Day:{}\n-NEW TASK".format(nCounter))
 
 
 
-def mainMenu():
-	print("Welcome to EZplan")
-	command = None
-	while(command != "exit"):
-		print("=================")
-		print("Please enter a command or type help for command list: ")
-		command = input()
-		if (command != "exit"):
-			initiateCommand(command)
+				
 
-def initiateCommand(curCommand):
-	try: 
-		commandTokens = curCommand.split(' ',1)[0]
-		commandItem = curCommand.split(' ',1)[1]
-		if(commandTokens == "create" and isinstance(commandItem,str)):
-			newNote(commandItem) #Sending note - need date
-		elif(commandTokens == "delete"):
-			deleteNote(int(commandItem)) #Sending ID
+
+class MainMenu:
+	def __init__(self):
+		print("Welcome to EZplan")
+		command = None
+		while(command != "exit"):
+			print("=================")
+			print("Please enter a command or type help for command list: ")
+			command = input()
+			if (command != "exit"):
+				self.initiateCommand(command)
+
+	def initiateCommand(self,curCommand):
+		try: 
+			commandTokens = curCommand.split(' ',1)[0]
+			commandItem = curCommand.split(' ',1)[1]
+			if(commandTokens == "create" and isinstance(commandItem,str)):
+				self.newNote(commandItem) #Sending note - need date
+			elif(commandTokens == "delete"):
+				self.deleteNote(int(commandItem)) #Sending ID
+			else:
+				print("ERROR: Please enter a valid command with correct parameters!")
+		except:
+			if(commandTokens == "list"):
+				self.showNotes()
+			elif(commandTokens == "help"):
+				print("Commands: \n'create <note>'\n'delete <id>'\n'list'")
+
+	#Create a new note then add to list
+	def newNote(self,nNote):
+		print("Please enter a date using this format year-month-date: ")
+		while True:
+			nDateStr = input()
+			try:
+				nDateObj = datetime.datetime.strptime(nDateStr,'%Y-%m-%d')
+				break
+			except:
+				print("ERROR: There was an error inputting the date please try again!")
+		curNote = Note(nNote,nDateObj)
+		notes.append(curNote)
+		print("Note was created and Saved!")
+		self.modifyList()
+
+	#Show list of notes and dates
+	def showNotes(self):
+		if(len(notes) != 0):
+			for n in range(len(notes)):
+				print("{}: {}".format(n,notes[n].description()))
 		else:
-			print("ERROR: Please enter a valid command with correct parameters!")
-	except:
-		if(commandTokens == "list"):
-			showNotes()
-		elif(commandTokens == "help"):
-			print("Commands: \n'create <note>'\n'delete <id>'\n'list'")
+			print("The list is empty!")
+
+	#Delete note with given ID
+	def deleteNote(self,ID):
+		try:
+			notes.pop(ID)
+			self.modifyList()
+			print("Item at index {} has been deleted!".format(ID))
+		except:
+			print("ERROR: Please enter the ID of a valid Note!")
+	# checks if the list changed if it did then save the list back to file for changes
+	def modifyList(self):
+		try:
+			with open(filePath,"wb") as nfp:
+				pickle.dump(notes,nfp)
+		except:
+			print("ERROR: There was an error saving your data!")
+
 
 
 filePath = "data.dat"
@@ -92,4 +135,5 @@ except:
 	notes = []
 	print("No file was loaded!")
 
-mainMenu()
+AppFrame()
+# MainMenu()
