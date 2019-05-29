@@ -36,7 +36,7 @@ class AppFrame:
 		for x in range(0,5):
 			for y in range(0,7):
 				counter +=1
-				labels = tk.Label(self.frame,font=("Courier",15),bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 12,height=6,text=str(counter))
+				labels = tk.Label(self.frame,font=("Courier",10),bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 12,height=6,text=str(counter))
 				labels.grid(column = y,row= x)
 				labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
 				self.days.append(labels)
@@ -50,11 +50,19 @@ class AppFrame:
 			self.isTaskWinOpen = True
 			self.taskWin = Toplevel(self.window)
 			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
-			self.taskWin.geometry("300x300")
+			self.taskWin.geometry("300x250")
+			self.taskWin.resizable(width=False,height=False)
+			self.listBox = Listbox(self.taskWin , width = 49)
 			self.taskLabel = tk.Label(self.taskWin,text = "Task Name: ")
-			self.taskLabel.grid(column = 0,row = 0)
 			self.taskInput = tk.Entry(self.taskWin,width = 30)
-			self.taskInput.grid(column = 1,row = 0)
+			self.submit = tk.Button(self.taskWin,text = "New")
+			self.delete = tk.Button(self.taskWin,text = "Delete")
+			self.listBox.grid(column = 0, row = 0,columnspan = 2)
+			self.taskLabel.grid(column = 0,row = 1)
+			self.taskInput.grid(column = 1,row = 1)
+			self.submit.grid(column = 0,row = 2)
+			self.delete.grid(column = 1,row = 2)
+			
 			# self.days[nCounter - 1].config(text="Day:{}\n-NEW TASK".format(nCounter))
 		print("IS OPENED: "+str(self.isTaskWinOpen))
 
