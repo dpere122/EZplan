@@ -4,6 +4,7 @@ import os
 import tkinter as tk
 from tkinter import *
 
+
 class Note:
     def __init__(self, noteText, dateDue):
         self.noteText = noteText
@@ -15,13 +16,12 @@ class Note:
 
 
 class AppFrame:
-
-	
 	def __init__(self):
 		self.days = []
+		self.isTaskWinOpen = False
 		self.window = tk.Tk()
 		self.window.title("EZPlanner")
-		self.window.geometry("1280x768")
+		self.window.geometry("800x600")
 		self.window.resizable(width=False,height=False)
 		self.frame = tk.Frame(self.window)
 		self.frame.pack()
@@ -30,30 +30,38 @@ class AppFrame:
 		self.window.mainloop()
 
 
+	# Should be responsible for keeping track of the month and how many days in each month
 	def createButtons(self):
 		counter = 0
 		for x in range(0,5):
 			for y in range(0,7):
 				counter +=1
-				self.labels = tk.Label(self.frame,font=("Courier",15),bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 12,height=6,text=str(counter))
-				self.labels.grid(column = y,row= x)
-				self.labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
-				self.days.append(self.labels)
+				labels = tk.Label(self.frame,font=("Courier",15),bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 12,height=6,text=str(counter))
+				labels.grid(column = y,row= x)
+				labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
+				self.days.append(labels)
 
 	# restrictions include: only one window open at a time
 	# both task and tasks of current date are shown 
 	# text input to add tasks
 	# then list view to show tasks 
 	def taskWindow(self,event,nCounter):
-		self.taskWin = Toplevel(self.window)
-		self.taskWin.geometry("300x300")
-		self.taskLabel = tk.Label(self.taskWin,text = "Task Name: ")
-		self.taskLabel.grid(column = 0,row = 0)
-		self.taskInput = tk.Entry(self.taskWin,width = 30)
-		self.taskInput.grid(column = 1,row = 0)
-		# self.days[nCounter - 1].config(text="Day:{}\n-NEW TASK".format(nCounter))
+		if(self.isTaskWinOpen == False):
+			self.isTaskWinOpen = True
+			self.taskWin = Toplevel(self.window)
+			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
+			self.taskWin.geometry("300x300")
+			self.taskLabel = tk.Label(self.taskWin,text = "Task Name: ")
+			self.taskLabel.grid(column = 0,row = 0)
+			self.taskInput = tk.Entry(self.taskWin,width = 30)
+			self.taskInput.grid(column = 1,row = 0)
+			# self.days[nCounter - 1].config(text="Day:{}\n-NEW TASK".format(nCounter))
+		print("IS OPENED: "+str(self.isTaskWinOpen))
 
-
+	def taskClosed(self):
+		print("TASK WAS CLOSED")
+		self.isTaskWinOpen = False
+		self.taskWin.destroy()
 
 				
 
