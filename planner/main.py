@@ -35,13 +35,17 @@ class AppFrame:
 	def createButtons(self):
 		counter = 0
 		# make this dynamic
-		start,totalDays = monthrange(2019,5)
+		start,totalDays = monthrange(2019,4)
+		print("start: "+ str(start)+" totalDays: "+ str(totalDays))
+		offCounter = 0
 		for x in range(0,5):
 			for y in range(0,7):
-				counter +=1
 				labels = tk.Label(self.frame,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 13,height=6)
-				if(counter >= start and counter <= totalDays ):
+				if(offCounter > start and counter < totalDays):
+					counter +=1	
 					labels.config(text = "Day: "+str(counter))
+				offCounter += 1
+				
 				
 				labels.grid(column = y,row= x)
 				labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
