@@ -3,6 +3,7 @@ import pickle
 import os
 import tkinter as tk
 from tkinter import *
+from calendar import monthrange
 
 
 class Note:
@@ -29,14 +30,19 @@ class AppFrame:
 		print(self.days)
 		self.window.mainloop()
 
-
+	# Fonts sizes are different on different machines, Must be something with the amount of pixels per sq inch
 	# Should be responsible for keeping track of the month and how many days in each month
 	def createButtons(self):
 		counter = 0
+		# make this dynamic
+		start,totalDays = monthrange(2019,5)
 		for x in range(0,5):
 			for y in range(0,7):
 				counter +=1
-				labels = tk.Label(self.frame,font=("Courier",10),bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 12,height=6,text=str(counter))
+				labels = tk.Label(self.frame,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 13,height=6)
+				if(counter >= start and counter <= totalDays ):
+					labels.config(text = "Day: "+str(counter))
+				
 				labels.grid(column = y,row= x)
 				labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
 				self.days.append(labels)
@@ -52,10 +58,10 @@ class AppFrame:
 			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
 			self.taskWin.geometry("300x250")
 			self.taskWin.resizable(width=False,height=False)
-			self.listBox = Listbox(self.taskWin , width = 49)
+			self.listBox = Listbox(self.taskWin , width = 35)
 			self.taskLabel = tk.Label(self.taskWin,text = "Task Name: ")
-			self.taskInput = tk.Entry(self.taskWin,width = 30)
-			self.submit = tk.Button(self.taskWin,text = "New")
+			self.taskInput = tk.Entry(self.taskWin,width = 25)
+			self.submit = tk.Button(self.taskWin,text = "Add")
 			self.delete = tk.Button(self.taskWin,text = "Delete")
 			self.listBox.grid(column = 0, row = 0,columnspan = 2)
 			self.taskLabel.grid(column = 0,row = 1)
@@ -70,6 +76,11 @@ class AppFrame:
 		print("TASK WAS CLOSED")
 		self.isTaskWinOpen = False
 		self.taskWin.destroy()
+
+	# def loadTasks(self):
+
+	# def addTask(self):
+
 
 				
 
