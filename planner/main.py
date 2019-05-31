@@ -11,10 +11,9 @@ class Note:
     def __init__(self, noteText, dateDue):
         self.noteText = noteText
         self.dateDue = dateDue
-		
 
     def description(self):
-        return "{} is due on {}".format(self.noteText,self.dateDue)
+        return "{}".format(self.noteText)
 
 
 class AppFrame:
@@ -73,10 +72,19 @@ class AppFrame:
 				labels = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne')
 				if(offCounter > start and counter < totalDays):
 					counter +=1	
-					labels.config(text = "Day: "+str(counter))
+					# labels.config(text = "Day: "+str(counter))
+					self.writeTasks(labels,counter)
 					labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
 					self.days.append(labels)
 				offCounter += 1
+
+	def writeTasks(self,label,day):
+		label.config(text = "Day: "+str(day))
+		itemDate = "{}-{}-{}".format(self.curYear,self.curMonth,day)
+		for i in range(0,len(notes)):
+			nDateObj = datetime.datetime.strptime(itemDate,'%Y-%m-%d')
+			if(notes[i].dateDue == nDateObj):
+				label.config(text = "Day: {}\n{}".format(day,notes[i].description())) 
 
 	def make_label(self,master, x, y, h, w, *args, **kwargs):
 		f = Frame(master,height = h,width = w)
@@ -94,22 +102,26 @@ class AppFrame:
 	# text input to add tasks
 	# then list view to show tasks 
 	def taskWindow(self,event,nCounter):
+		print(nCounter)
 		if(self.isTaskWinOpen == False):
 			self.isTaskWinOpen = True
 			self.taskWin = Toplevel(self.window)
 			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
-			self.taskWin.geometry("300x250")
+			self.taskWin.geometry("300x220")
 			self.taskWin.resizable(width=False,height=False)
-			self.listBox = Listbox(self.taskWin , width = 35)
-			self.taskLabel = tk.Label(self.taskWin,text = "Task Name: ")
-			self.taskInput = tk.Entry(self.taskWin,width = 25)
-			self.submit = tk.Button(self.taskWin,text = "Add")
-			self.delete = tk.Button(self.taskWin,text = "Delete")
-			self.listBox.grid(column = 0, row = 0,columnspan = 2)
-			self.taskLabel.grid(column = 0,row = 1)
-			self.taskInput.grid(column = 1,row = 1)
-			self.submit.grid(column = 0,row = 2)
-			self.delete.grid(column = 1,row = 2)
+			self.taskWin.update()
+			self.buttonFrame = tk.Frame(self.taskWin)
+			self.listBox = Listbox(self.taskWin,width = self.taskWin.winfo_width())
+			self.taskLabel = tk.Label(self.buttonFrame,text = "Task Name: ")
+			self.taskInput = tk.Entry(self.buttonFrame,width = 25)
+			self.submit = tk.Button(self.buttonFrame,text = "Add")
+			self.delete = tk.Button(self.buttonFrame,text = "Delete")
+			self.listBox.pack()
+			self.buttonFrame.pack()
+			self.taskLabel.grid(row = 0, column = 0)
+			self.taskInput.grid(row = 0, column = 1)
+			self.submit.grid(row = 1, column = 0)
+			self.delete.grid(row = 1, column = 1)
 			
 			# self.days[nCounter - 1].config(text="Day:{}\n-NEW TASK".format(nCounter))
 		print("IS OPENED: "+str(self.isTaskWinOpen))
@@ -123,10 +135,7 @@ class AppFrame:
 
 	# def addTask(self):
 
-
-				
-
-
+			
 class MainMenu:
 	def __init__(self):
 		print("Welcome to EZplan")
