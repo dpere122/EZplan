@@ -3,7 +3,8 @@ import pickle
 import os
 import tkinter as tk
 from tkinter import *
-from calendar import monthrange
+# from calendar import monthrange
+import calendar
 
 
 class Note:
@@ -18,38 +19,75 @@ class Note:
 
 class AppFrame:
 	def __init__(self):
-		self.days = []
+		now = datetime.datetime.now()
+		self.curYear = now.year
+		self.curMonth = now.month
 		self.isTaskWinOpen = False
 		self.window = tk.Tk()
 		self.window.title("EZPlanner")
-		self.window.geometry("800x600")
+		self.window.geometry("840x600")
 		self.window.resizable(width=False,height=False)
-		self.frame = tk.Frame(self.window)
-		self.frame.pack()
-		self.createButtons()
-		print(self.days)
+		self.banner = tk.Frame(self.window,borderwidth = 2, relief = "solid")
+		self.banner.pack(fill = X)
+		self.btnLeft = tk.Button(self.banner,text = "<-", command = lambda: self.validateDate(-1))
+		self.btnLeft.pack(side = LEFT)
+		self.btnRight = tk.Button(self.banner,text = "->",command = lambda: self.validateDate(1))
+		self.btnRight.pack(side = RIGHT)
+		self.genCalendar(self.curYear,self.curMonth)
 		self.window.mainloop()
 
-	# Fonts sizes are different on different machines, Must be something with the amount of pixels per sq inch
+	def validateDate(self, interval):
+		self.frame.destroy()
+		self.calLabel.destroy()
+		self.curMonth += interval
+		if(self.curMonth < 1):
+			self.curYear -=1
+			self.curMonth = 12
+		elif(self.curMonth > 12):
+			self.curYear += 1
+			self.curMonth = 1
+		self.genCalendar(self.curYear,self.curMonth)
+
+
 	# Should be responsible for keeping track of the month and how many days in each month
-	def createButtons(self):
+	def genCalendar(self,year,month):
+		self.days = []
+		self.frame = tk.Frame(self.window)
+		self.calLabel = tk.Label(self.banner,anchor = CENTER,text = "{} : {}".format(calendar.month_name[month],str(self.curYear)),height = 2,font = ("Ariel",25))
+		self.calLabel.pack(side = TOP)
+		self.frame.pack(fill = BOTH)		
+		self.frame.update()
+		self.banner.update()
+		fWidth = self.frame.winfo_width()
+		fHeight = self.window.winfo_height() - self.banner.winfo_height()
+		cellWidth = (fWidth / 7)
+		cellHeight = (fHeight / 6)
 		counter = 0
 		# make this dynamic
-		start,totalDays = monthrange(2019,4)
-		print("start: "+ str(start)+" totalDays: "+ str(totalDays))
+		start,totalDays = calendar.monthrange(year,month)
+		# print("start: "+ str(start)+" totalDays: "+ str(totalDays))
 		offCounter = 0
-		for x in range(0,5):
+		# print(self.window.winfo_height())
+		for x in range(0,6):
 			for y in range(0,7):
-				labels = tk.Label(self.frame,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne',width = 13,height=6)
+				labels = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne')
 				if(offCounter > start and counter < totalDays):
 					counter +=1	
 					labels.config(text = "Day: "+str(counter))
+					labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
+					self.days.append(labels)
 				offCounter += 1
+
+	def make_label(self,master, x, y, h, w, *args, **kwargs):
+		f = Frame(master,height = h,width = w)
+		f.pack_propagate(0) # don't shrink
+		f.grid(row=x, column=y)
+		label = Label(f, *args, **kwargs)
+		label.pack(fill=BOTH, expand=1)
+		return label	
+	
+
 				
-				
-				labels.grid(column = y,row= x)
-				labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
-				self.days.append(labels)
 
 	# restrictions include: only one window open at a time
 	# both task and tasks of current date are shown 
