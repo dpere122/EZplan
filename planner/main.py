@@ -139,9 +139,7 @@ class AppFrame:
 		print("TASK WAS CLOSED")
 		self.isTaskWinOpen = False
 		self.taskWin.destroy()
-
-	# def loadTasks(self):
-
+		
 	def addTask(self,date):
 		taskText = self.taskInput.get()
 		if(taskText != ""):
@@ -153,7 +151,6 @@ class AppFrame:
 		else:
 			print("No Text in input")
 
-	# ISSUE find a way to delete the original note from the notes list given the current selection
 	def delTask(self,taskList):
 		selection = self.listBox.curselection()
 		self.listBox.delete(selection)
