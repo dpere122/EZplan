@@ -17,7 +17,9 @@ class Note:
 
 
 class AppFrame:
+	
 	def __init__(self):
+		self.nm = NoteManager()
 		now = datetime.datetime.now()
 		self.curYear = now.year
 		self.curMonth = now.month
@@ -74,15 +76,16 @@ class AppFrame:
 					counter +=1	
 					# labels.config(text = "Day: "+str(counter))
 					self.writeTasks(labels,counter)
-					labels.bind("<Button-1>",lambda event, nCounter = counter: self.taskWindow(event, nCounter))
-					self.days.append(labels)
+					
 				offCounter += 1
 
 	def writeTasks(self,label,day):
 		label.config(text = "Day: "+str(day))
 		itemDate = "{}-{}-{}".format(self.curYear,self.curMonth,day)
+		nDateObj = datetime.datetime.strptime(itemDate,'%Y-%m-%d')
+		label.bind("<Button-1>",lambda event, date = nDateObj: self.taskWindow(event, nDateObj))
+		self.days.append(label)
 		for i in range(0,len(notes)):
-			nDateObj = datetime.datetime.strptime(itemDate,'%Y-%m-%d')
 			if(notes[i].dateDue == nDateObj):
 				label.config(text = "Day: {}\n{}".format(day,notes[i].description())) 
 
@@ -101,8 +104,9 @@ class AppFrame:
 	# both task and tasks of current date are shown 
 	# text input to add tasks
 	# then list view to show tasks 
-	def taskWindow(self,event,nCounter):
-		print(nCounter)
+	def taskWindow(self,event,date):
+		print(date)
+		curTasks = []
 		if(self.isTaskWinOpen == False):
 			self.isTaskWinOpen = True
 			self.taskWin = Toplevel(self.window)
@@ -114,14 +118,19 @@ class AppFrame:
 			self.listBox = Listbox(self.taskWin,width = self.taskWin.winfo_width())
 			self.taskLabel = tk.Label(self.buttonFrame,text = "Task Name: ")
 			self.taskInput = tk.Entry(self.buttonFrame,width = 25)
-			self.submit = tk.Button(self.buttonFrame,text = "Add")
-			self.delete = tk.Button(self.buttonFrame,text = "Delete")
+			self.submit = tk.Button(self.buttonFrame,text = "Add", command = lambda : self.addTask(date))
+			self.delete = tk.Button(self.buttonFrame,text = "Delete", command = lambda : self.delTask(curTasks))
 			self.listBox.pack()
 			self.buttonFrame.pack()
 			self.taskLabel.grid(row = 0, column = 0)
 			self.taskInput.grid(row = 0, column = 1)
 			self.submit.grid(row = 1, column = 0)
 			self.delete.grid(row = 1, column = 1)
+			# I should make a method for this
+			for i in range(0,len(notes)):
+				if(notes[i].dateDue == date):
+					self.listBox.insert(END,notes[i].description())
+					curTasks.append(notes[i])
 			
 			# self.days[nCounter - 1].config(text="Day:{}\n-NEW TASK".format(nCounter))
 		print("IS OPENED: "+str(self.isTaskWinOpen))
@@ -133,68 +142,29 @@ class AppFrame:
 
 	# def loadTasks(self):
 
-	# def addTask(self):
+	def addTask(self,date):
+		taskText = self.taskInput.get()
+		if(taskText != ""):
+			note = Note(taskText,date)
+			notes.append(note)
+			self.listBox.insert(END, note.description())
+			self.listBox.update()
+			self.nm.modifyList()
+		else:
+			print("No Text in input")
+
+	# ISSUE find a way to delete the original note from the notes list given the current selection
+	def delTask(self,taskList):
+		selection = self.listBox.curselection()
+		self.listBox.delete(selection)
+		del(taskList[selection[0]])
+		self.nm.modifyList()
+
+
 
 			
-class MainMenu:
-	def __init__(self):
-		print("Welcome to EZplan")
-		command = None
-		while(command != "exit"):
-			print("=================")
-			print("Please enter a command or type help for command list: ")
-			command = input()
-			if (command != "exit"):
-				self.initiateCommand(command)
+class NoteManager:
 
-	def initiateCommand(self,curCommand):
-		try: 
-			commandTokens = curCommand.split(' ',1)[0]
-			commandItem = curCommand.split(' ',1)[1]
-			if(commandTokens == "create" and isinstance(commandItem,str)):
-				self.newNote(commandItem) #Sending note - need date
-			elif(commandTokens == "delete"):
-				self.deleteNote(int(commandItem)) #Sending ID
-			else:
-				print("ERROR: Please enter a valid command with correct parameters!")
-		except:
-			if(commandTokens == "list"):
-				self.showNotes()
-			elif(commandTokens == "help"):
-				print("Commands: \n'create <note>'\n'delete <id>'\n'list'")
-
-	#Create a new note then add to list
-	def newNote(self,nNote):
-		print("Please enter a date using this format year-month-date: ")
-		while True:
-			nDateStr = input()
-			try:
-				nDateObj = datetime.datetime.strptime(nDateStr,'%Y-%m-%d')
-				break
-			except:
-				print("ERROR: There was an error inputting the date please try again!")
-		curNote = Note(nNote,nDateObj)
-		notes.append(curNote)
-		print("Note was created and Saved!")
-		self.modifyList()
-
-	#Show list of notes and dates
-	def showNotes(self):
-		if(len(notes) != 0):
-			for n in range(len(notes)):
-				print("{}: {}".format(n,notes[n].description()))
-		else:
-			print("The list is empty!")
-
-	#Delete note with given ID
-	def deleteNote(self,ID):
-		try:
-			notes.pop(ID)
-			self.modifyList()
-			print("Item at index {} has been deleted!".format(ID))
-		except:
-			print("ERROR: Please enter the ID of a valid Note!")
-	# checks if the list changed if it did then save the list back to file for changes
 	def modifyList(self):
 		try:
 			with open(filePath,"wb") as nfp:
@@ -214,4 +184,3 @@ except:
 	print("No file was loaded!")
 
 AppFrame()
-# MainMenu()
