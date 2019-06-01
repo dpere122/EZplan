@@ -129,8 +129,8 @@ class AppFrame:
 			# I should make a method for this
 			for i in range(0,len(notes)):
 				if(notes[i].dateDue == date):
+					curTasks.append(i)
 					self.listBox.insert(END,notes[i].description())
-					curTasks.append(notes[i])
 			
 			# self.days[nCounter - 1].config(text="Day:{}\n-NEW TASK".format(nCounter))
 		print("IS OPENED: "+str(self.isTaskWinOpen))
@@ -157,7 +157,7 @@ class AppFrame:
 	def delTask(self,taskList):
 		selection = self.listBox.curselection()
 		self.listBox.delete(selection)
-		del(taskList[selection[0]])
+		del(notes[taskList[selection[0]]])
 		self.nm.modifyList()
 
 
