@@ -7,15 +7,6 @@ from tkinter import *
 import calendar
 
 
-class Note:
-    def __init__(self, noteText, dateDue):
-        self.noteText = noteText
-        self.dateDue = dateDue
-
-    def description(self):
-        return "{}".format(self.noteText)
-
-
 class AppFrame:
 	
 	def __init__(self):
@@ -52,7 +43,7 @@ class AppFrame:
 
 	# Should be responsible for keeping track of the month and how many days in each month
 	def genCalendar(self,year,month):
-		self.days = []
+		self.labels = []
 		self.frame = tk.Frame(self.window)
 		self.calLabel = tk.Label(self.banner,anchor = CENTER,text = "{} : {}".format(calendar.month_name[month],str(self.curYear)),height = 2,font = ("Ariel",25))
 		self.calLabel.pack(side = TOP)
@@ -71,23 +62,24 @@ class AppFrame:
 		# print(self.window.winfo_height())
 		for x in range(0,6):
 			for y in range(0,7):
-				labels = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne')
+				label = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne')
 				if(offCounter > start and counter < totalDays):
+					nCounter = counter + 1
+					self.labels.append(self.writeTasks(label,nCounter))
 					counter +=1	
-					# labels.config(text = "Day: "+str(counter))
-					self.writeTasks(labels,counter)
-					
+
+
 				offCounter += 1
+		self.refreshLabel()
 
 	def writeTasks(self,label,day):
-		label.config(text = "Day: "+str(day))
+		labelIndex = day - 1
 		itemDate = "{}-{}-{}".format(self.curYear,self.curMonth,day)
 		nDateObj = datetime.datetime.strptime(itemDate,'%Y-%m-%d')
-		label.bind("<Button-1>",lambda event, date = nDateObj: self.taskWindow(event, nDateObj))
-		self.days.append(label)
-		for i in range(0,len(notes)):
-			if(notes[i].dateDue == nDateObj):
-				label.config(text = "Day: {}\n{}".format(day,notes[i].description())) 
+		dayObj = DayObj(labelIndex,nDateObj)
+		label.bind("<Button-1>",lambda event, date = nDateObj: self.taskWindow(event,dayObj))
+		return label
+		
 
 	def make_label(self,master, x, y, h, w, *args, **kwargs):
 		f = Frame(master,height = h,width = w)
@@ -98,15 +90,7 @@ class AppFrame:
 		return label	
 	
 
-				
-
-	# restrictions include: only one window open at a time
-	# both task and tasks of current date are shown 
-	# text input to add tasks
-	# then list view to show tasks 
-	def taskWindow(self,event,date):
-		print(date)
-		curTasks = []
+	def taskWindow(self,event,dayObj):
 		if(self.isTaskWinOpen == False):
 			self.isTaskWinOpen = True
 			self.taskWin = Toplevel(self.window)
@@ -118,44 +102,58 @@ class AppFrame:
 			self.listBox = Listbox(self.taskWin,width = self.taskWin.winfo_width())
 			self.taskLabel = tk.Label(self.buttonFrame,text = "Task Name: ")
 			self.taskInput = tk.Entry(self.buttonFrame,width = 25)
-			self.submit = tk.Button(self.buttonFrame,text = "Add", command = lambda : self.addTask(date))
-			self.delete = tk.Button(self.buttonFrame,text = "Delete", command = lambda : self.delTask(curTasks))
+			self.submit = tk.Button(self.buttonFrame,text = "Add", command = lambda : self.addTask(dayObj))
+			self.delete = tk.Button(self.buttonFrame,text = "Delete", command = lambda : self.delTask(dayObj))
 			self.listBox.pack()
 			self.buttonFrame.pack()
 			self.taskLabel.grid(row = 0, column = 0)
 			self.taskInput.grid(row = 0, column = 1)
 			self.submit.grid(row = 1, column = 0)
 			self.delete.grid(row = 1, column = 1)
-			# I should make a method for this
-			for i in range(0,len(notes)):
-				if(notes[i].dateDue == date):
-					curTasks.append(i)
-					self.listBox.insert(END,notes[i].description())
-			
-			# self.days[nCounter - 1].config(text="Day:{}\n-NEW TASK".format(nCounter))
-		print("IS OPENED: "+str(self.isTaskWinOpen))
+			for item in range(0,len(dayObj.tasks)):
+				self.listBox.insert(END, dayObj.tasks[item])
+		print("TASK WINDOW OPENED")
 
 	def taskClosed(self):
 		print("TASK WAS CLOSED")
 		self.isTaskWinOpen = False
 		self.taskWin.destroy()
 		
-	def addTask(self,date):
+	def addTask(self,dayObj):
 		taskText = self.taskInput.get()
 		if(taskText != ""):
-			note = Note(taskText,date)
-			notes.append(note)
-			self.listBox.insert(END, note.description())
-			self.listBox.update()
+			note = Note(taskText)
+			dayObj.addTask(taskText)
+			self.listBox.insert(END,taskText)
 			self.nm.modifyList()
+			self.refreshLabel()
+			print(days)
 		else:
-			print("No Text in input")
+			print("No text in input")
 
-	def delTask(self,taskList):
+	def delTask(self,dayObj):
 		selection = self.listBox.curselection()
 		self.listBox.delete(selection)
-		del(notes[taskList[selection[0]]])
+		dayObj.delTask(selection[0])
 		self.nm.modifyList()
+		self.refreshLabel()
+
+# issue: assign text to all the labels but also assign the tasks to each label if it has a day object with tasks inside
+	def refreshLabel(self):
+
+		for x in range(0,len(self.labels)):
+			labelStr = "Day: {}".format(x)
+			self.labels[x].config(text = labelStr)
+
+		for i in range(0,len(days)):
+			labelStr = "Day: {}".format(i)
+			if(days[i].isEmpty != True):
+				for t in range(0,len(days[i].tasks)):
+					nStr = labelStr+str(days[i].tasks[t])
+					self.labels[days[i].labelIndex].config(text = nStr)
+			else:
+				self.labels[days.labelIndex].config(text = labelStr)
+
 
 
 
@@ -165,19 +163,62 @@ class NoteManager:
 	def modifyList(self):
 		try:
 			with open(filePath,"wb") as nfp:
-				pickle.dump(notes,nfp)
+				pickle.dump(days,nfp)
 		except:
 			print("ERROR: There was an error saving your data!")
+
+
+class Note:
+	def __init__(self, noteText):
+		self.noteText = noteText
+
+	def description(self):
+		return "{}\n".format(self.noteText)
+
+class DayObj:
+	def __init__(self,labelIndex,date):
+		self.labelIndex = labelIndex
+		self.tasks = []
+		self.date = date
+		self.isSaved = False
+		
+	def addTask(self,note):
+		self.tasks.append(note)
+		if(self.isSaved == False):
+			self.isSaved = True
+			days.append(self)
+
+
+	def delTask(self,id):
+		if(self.isSaved == True):
+			del(self.tasks[id])
+		elif(self.isEmpty == True):
+			self.isSaved = False
+			days.remove(self)
+
+	def isEmpty(self):
+		if(tasks[0] != None):
+			return True
+		else:
+			return False
+
+	# def refreshLabel(self):
+	# 	nText = self.labelText
+	# 	for item in self.tasks:
+	# 		nText += item.description()
+	# 	self.label.config(text = nText)
+		
+
 
 
 
 filePath = "data.dat"
 try:
 	with open(filePath,'rb') as fp:
-		notes = pickle.load(fp)
+		days = pickle.load(fp)
 		print("Data file was successfuly loaded!")
 except:
-	notes = []
+	days = []
 	print("No file was loaded!")
 
 AppFrame()
