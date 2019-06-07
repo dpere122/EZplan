@@ -3,7 +3,6 @@ import pickle
 import os
 import tkinter as tk
 from tkinter import *
-# from calendar import monthrange
 import calendar
 
 
@@ -12,11 +11,6 @@ class AppFrame:
 	def __init__(self):
 		now = datetime.datetime.now()
 		self.nm = NoteManager()
-
-		# nDate = datetime.datetime(2019,6,10)
-		# nNote = "THIS IS A TASK"
-		# self.nm.addNote(nNote,nDate)
-
 		self.curYear = now.year
 		self.curMonth = now.month
 		self.isTaskWinOpen = False
@@ -69,6 +63,7 @@ class AppFrame:
 			for y in range(0,7):
 				label = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne')
 				if(offCounter > start and counter < totalDays):
+					label.config(bg = "#336699")
 					self.labels.append(label)
 					counter +=1	
 
@@ -107,7 +102,7 @@ class AppFrame:
 			self.isTaskWinOpen = True
 			self.taskWin = Toplevel(self.window)
 			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
-			self.taskWin.geometry("300x220")
+			self.taskWin.geometry("300x230")
 			self.taskWin.resizable(width=False,height=False)
 			self.taskWin.update()
 			self.buttonFrame = tk.Frame(self.taskWin)
