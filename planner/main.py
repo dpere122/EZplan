@@ -18,7 +18,7 @@ class AppFrame:
 		self.window = tk.Tk()
 		self.window.title("EZPlanner")
 		self.window.geometry("840x600")
-		self.window.iconbitmap(r"images\cal_icon.ico")
+		self.window.iconbitmap(r"planner\images\cal_icon.ico")
 		self.window.attributes('-topmost',0)
 		self.window.resizable(width=False,height=False)
 		self.banner = tk.Frame(self.window,borderwidth = 2, relief = "solid")
@@ -52,20 +52,22 @@ class AppFrame:
 		self.frame.pack(fill = BOTH)		
 		self.frame.update()
 		self.banner.update()
+
 		fWidth = self.frame.winfo_width()
 		fHeight = self.window.winfo_height() - self.banner.winfo_height()
 		cellWidth = (fWidth / 7)
 		cellHeight = (fHeight / 6)
 		counter = 0
-		# make this dynamic
 		start,totalDays = calendar.monthrange(year,month)
-		# print("start: "+ str(start)+" totalDays: "+ str(totalDays))
 		offCounter = 0
 		curDate = datetime.datetime(self.now.year,self.now.month,self.now.day)
-		# print(self.window.winfo_height())
+
+
 		for x in range(0,6):
 			for y in range(0,7):
+
 				label = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "white",borderwidth = 2,relief="groove",anchor = 'ne',justify = RIGHT,wraplength=110)
+				
 				if(offCounter > start and counter < totalDays):
 					self.labels.append(label)
 					counter +=1	
@@ -75,7 +77,6 @@ class AppFrame:
 
 
 				offCounter += 1
-		# Refresh labels for printing text
 		self.refreshLabels()
 		
 
@@ -109,7 +110,7 @@ class AppFrame:
 			self.taskWin = Toplevel(self.window)
 			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
 			self.taskWin.geometry("300x220")
-			self.taskWin.iconbitmap(r"images\cal_icon.ico")
+			self.taskWin.iconbitmap(r"planner\images\cal_icon.ico")
 			self.taskWin.resizable(width=False,height=False)
 			self.taskWin.update()
 			self.buttonFrame = tk.Frame(self.taskWin)
