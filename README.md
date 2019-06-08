@@ -1,4 +1,8 @@
 # EZplan
-Fully featured calendar with GUI elements and task system.
-GUI is still in the early stages..
-  
+Simple lightweight calendar application made in python3 with a tkinter module GUI.
+
+## Features:
+- Accounts for leap years
+- Integrated task system
+- Persistant task data between sessions
+- Easy to use GUI
