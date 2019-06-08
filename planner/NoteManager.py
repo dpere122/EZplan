@@ -1,6 +1,7 @@
 import pickle
 import Note
-# There needs to be a way to save notes and be able to easily change the labels based on the data
+# Key component to this class is the dictionary and how it stores our data
+# Simply a dictionary with dates as keys and values are string arrays 
 class NoteManager:
 	def __init__(self):
 		try:

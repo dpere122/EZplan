@@ -22,12 +22,12 @@ class AppFrame:
 		self.window.attributes('-topmost',0)
 		# ALL COMPONENTS RESIZE BUT ARE NOT UPDATED UNTIL THEY ARE REGENERATED(POSSIBLE FEATURE) 
 		self.window.resizable(width=False,height=False)
-		self.banner = tk.Frame(self.window,borderwidth = 2, relief = "solid")
+		self.banner = tk.Frame(self.window)
 		self.banner.pack(fill = X)
-		self.btnLeft = tk.Button(self.banner,text = "<-", command = lambda: self.validateDate(-1))
-		self.btnLeft.pack(side = LEFT)
-		self.btnRight = tk.Button(self.banner,text = "->",command = lambda: self.validateDate(1))
-		self.btnRight.pack(side = RIGHT)
+		self.btnLeft = tk.Button(self.banner,text = "<-",font = ("Courier",20),relief = "groove", command = lambda: self.validateDate(-1))
+		self.btnLeft.pack(side = LEFT,fill = Y)
+		self.btnRight = tk.Button(self.banner,text = "->",font = ("Courier",20),relief = "groove",command = lambda: self.validateDate(1))
+		self.btnRight.pack(side = RIGHT, fill = Y)
 		self.weekDays = tk.Frame(self.window,borderwidth = 1, relief = "solid")
 		self.weekDays.pack(fill = X)
 		self.genCalendar(self.curYear,self.curMonth)
@@ -41,6 +41,7 @@ class AppFrame:
 
 		self.window.mainloop()
 
+	# Button action to delete past cells and generate new month cells
 	def validateDate(self, interval):
 		self.frame.destroy()
 		self.calLabel.destroy()
@@ -74,10 +75,10 @@ class AppFrame:
 		offCounter = 0
 		curDate = datetime.datetime(self.now.year,self.now.month,self.now.day)
 
-
+		# creates cells for each day of the month
 		for x in range(0,6):
 			for y in range(0,7):
-
+				# Labels packed inside frames due to a resizing issue
 				label = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "white",borderwidth = 2,relief="groove",anchor = 'ne',justify = RIGHT,wraplength=110)
 				
 				if(offCounter > start and counter < totalDays):
@@ -91,7 +92,7 @@ class AppFrame:
 				offCounter += 1
 		self.refreshLabels()
 		
-
+	# Responisble for changing the text of each cell according to the notemanager and tasks for each item in the dictionary
 	def refreshLabels(self):
 		counter = 0
 		for label in self.labels:
@@ -106,7 +107,7 @@ class AppFrame:
 
 
 
-
+	# creates labels packed inside frame
 	def make_label(self,master, x, y, h, w, *args, **kwargs):
 		f = Frame(master,height = h,width = w)
 		f.pack_propagate(0) # don't shrink
@@ -115,7 +116,7 @@ class AppFrame:
 		label.pack(fill=BOTH, expand=1)
 		return label	
 	
-
+	# task window to add or delete tasks
 	def taskWindow(self,event,date):
 		if(self.isTaskWinOpen == False):
 			self.isTaskWinOpen = True
@@ -142,20 +143,21 @@ class AppFrame:
 				for item in self.nm.noteDatabase.get(date).tasks:
 					self.listBox.insert(END, item)
 		print("TASK WINDOW OPENED")
-
+	# Ensures theres only one task window open at a time
 	def taskClosed(self):
 		print("TASK WAS CLOSED")
 		self.isTaskWinOpen = False
 		self.taskWin.destroy()
-		
+	# Add tasks while changing our database file
 	def addTask(self,date):
 		if(self.taskInput.get() != ""):
 			taskText = self.taskInput.get()
 			self.nm.addNote(taskText,date)
 			self.listBox.insert(END,taskText)
 			self.refreshLabels()
+			self.taskInput.delete(0,'end')
 
-
+	# Deletes a task while updating our database file
 	def delTask(self,date):
 		selection = self.listBox.curselection()
 		taskText = self.listBox.get(selection)
