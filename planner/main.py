@@ -17,9 +17,10 @@ class AppFrame:
 		self.isTaskWinOpen = False
 		self.window = tk.Tk()
 		self.window.title("EZPlanner")
-		self.window.geometry("840x600")
+		self.window.geometry("840x700")
 		self.window.iconbitmap(r"planner\images\cal_icon.ico")
 		self.window.attributes('-topmost',0)
+		# ALL COMPONENTS RESIZE BUT ARE NOT UPDATED UNTIL THEY ARE REGENERATED(POSSIBLE FEATURE) 
 		self.window.resizable(width=False,height=False)
 		self.banner = tk.Frame(self.window,borderwidth = 2, relief = "solid")
 		self.banner.pack(fill = X)
@@ -27,7 +28,17 @@ class AppFrame:
 		self.btnLeft.pack(side = LEFT)
 		self.btnRight = tk.Button(self.banner,text = "->",command = lambda: self.validateDate(1))
 		self.btnRight.pack(side = RIGHT)
+		self.weekDays = tk.Frame(self.window,borderwidth = 1, relief = "solid")
+		self.weekDays.pack(fill = X)
 		self.genCalendar(self.curYear,self.curMonth)
+		# gen labels for days of the week
+		self.window.update()
+		fWidth = self.window.winfo_width()
+		cellWidth = int((fWidth / 7))
+		weekDaysList = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+		for x in range(len(weekDaysList)):
+			weekDayLabel = self.make_label(self.weekDays,0,x,h = 20,w = cellWidth,relief = "groove",borderwidth = 1,text = "{}".format(weekDaysList[x]))
+
 		self.window.mainloop()
 
 	def validateDate(self, interval):
@@ -47,16 +58,17 @@ class AppFrame:
 	def genCalendar(self,year,month):
 		self.labels = []
 		self.frame = tk.Frame(self.window)
-		self.calLabel = tk.Label(self.banner,anchor = CENTER,text = "{} : {}".format(calendar.month_name[month],str(self.curYear)),height = 2,font = ("Ariel",25))
+		self.calLabel = tk.Label(self.banner,anchor = CENTER,text = "{} : {}".format(calendar.month_name[month],str(self.curYear)),height = 2,font = ("Ariel",20))
 		self.calLabel.pack(side = TOP)
 		self.frame.pack(fill = BOTH)		
 		self.frame.update()
 		self.banner.update()
-
-		fWidth = self.frame.winfo_width()
-		fHeight = self.window.winfo_height() - self.banner.winfo_height()
+		self.weekDays.update()
+		fWidth = self.window.winfo_width()
+		fHeight = self.window.winfo_height() - self.banner.winfo_height() - self.weekDays.winfo_height()
 		cellWidth = (fWidth / 7)
 		cellHeight = (fHeight / 6)
+
 		counter = 0
 		start,totalDays = calendar.monthrange(year,month)
 		offCounter = 0

@@ -4,7 +4,7 @@ import Note
 class NoteManager:
 	def __init__(self):
 		try:
-			with open("database/data.dat",'rb') as fp:
+			with open("planner\database\data.dat",'rb') as fp:
 				self.noteDatabase = pickle.load(fp)
 				print("Data file was successfuly loaded!")
 		except:
@@ -44,7 +44,7 @@ class NoteManager:
 
 	def modifyList(self):
 		try:
-			with open("database/data.dat","wb") as nfp:
+			with open("planner\database\data.dat","wb") as nfp:
 				pickle.dump(self.noteDatabase,nfp)
 		except:
 			print("ERROR: There was an error saving your data!")
