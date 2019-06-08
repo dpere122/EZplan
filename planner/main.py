@@ -3,26 +3,22 @@ import pickle
 import os
 import tkinter as tk
 from tkinter import *
-# from calendar import monthrange
 import calendar
 
 
 class AppFrame:
 	
 	def __init__(self):
-		now = datetime.datetime.now()
+		self.now = datetime.datetime.now()
 		self.nm = NoteManager()
-
-		# nDate = datetime.datetime(2019,6,10)
-		# nNote = "THIS IS A TASK"
-		# self.nm.addNote(nNote,nDate)
-
-		self.curYear = now.year
-		self.curMonth = now.month
+		self.curYear = self.now.year
+		self.curMonth = self.now.month
 		self.isTaskWinOpen = False
 		self.window = tk.Tk()
 		self.window.title("EZPlanner")
 		self.window.geometry("840x600")
+		self.window.iconbitmap(r"planner\cal_icon.ico")
+		self.window.attributes('-topmost',0)
 		self.window.resizable(width=False,height=False)
 		self.banner = tk.Frame(self.window,borderwidth = 2, relief = "solid")
 		self.banner.pack(fill = X)
@@ -64,13 +60,17 @@ class AppFrame:
 		start,totalDays = calendar.monthrange(year,month)
 		# print("start: "+ str(start)+" totalDays: "+ str(totalDays))
 		offCounter = 0
+		curDate = datetime.datetime(self.now.year,self.now.month,self.now.day)
 		# print(self.window.winfo_height())
 		for x in range(0,6):
 			for y in range(0,7):
-				label = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne')
+				label = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "white",borderwidth = 2,relief="groove",anchor = 'ne',justify = RIGHT,wraplength=110)
 				if(offCounter > start and counter < totalDays):
 					self.labels.append(label)
 					counter +=1	
+					offDate = datetime.datetime(self.curYear,self.curMonth,counter)
+					if(curDate > offDate):
+						label.config(bg = "grey")
 
 
 				offCounter += 1
@@ -108,6 +108,7 @@ class AppFrame:
 			self.taskWin = Toplevel(self.window)
 			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
 			self.taskWin.geometry("300x220")
+			self.taskWin.iconbitmap(r"planner\cal_icon.ico")
 			self.taskWin.resizable(width=False,height=False)
 			self.taskWin.update()
 			self.buttonFrame = tk.Frame(self.taskWin)
@@ -122,6 +123,7 @@ class AppFrame:
 			self.taskInput.grid(row = 0, column = 1)
 			self.submit.grid(row = 1, column = 0)
 			self.delete.grid(row = 1, column = 1)
+			self.taskWin.attributes('-topmost',1)
 			if(date in self.nm.noteDatabase.keys()):
 				for item in self.nm.noteDatabase.get(date).tasks:
 					self.listBox.insert(END, item)
@@ -154,8 +156,6 @@ class AppFrame:
 
 # There needs to be a way to save notes and be able to easily change the labels based on the data
 class NoteManager:
-
-
 	def __init__(self):
 		try:
 			with open(filePath,'rb') as fp:
