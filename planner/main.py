@@ -122,7 +122,7 @@ class AppFrame:
 			self.isTaskWinOpen = True
 			self.taskWin = Toplevel(self.window)
 			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
-			self.taskWin.geometry("300x220")
+			self.taskWin.geometry("300x230")
 			self.taskWin.iconbitmap(r"planner\images\cal_icon.ico")
 			self.taskWin.resizable(width=False,height=False)
 			self.taskWin.update()
