@@ -1,4 +1,3 @@
 
 .vscode/launch.json
 *.pyc
-planner\database\data.dat
