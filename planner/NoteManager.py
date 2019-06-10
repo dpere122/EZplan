@@ -1,11 +1,14 @@
 import pickle
 import Note
+from pathlib import Path
 # Key component to this class is the dictionary and how it stores our data
 # Simply a dictionary with dates as keys and values are string arrays 
 class NoteManager:
 	def __init__(self):
+		dataFolder = Path("planner/database/")
+		self.dataFile  = dataFolder / "data.dat"
 		try:
-			with open("planner\database\data.dat",'rb') as fp:
+			with open(self.dataFile,'rb') as fp:
 				self.noteDatabase = pickle.load(fp)
 				print("Data file was successfuly loaded!")
 		except:
@@ -45,7 +48,7 @@ class NoteManager:
 
 	def modifyList(self):
 		try:
-			with open("planner\database\data.dat","wb") as nfp:
+			with open(self.dataFile,"wb") as nfp:
 				pickle.dump(self.noteDatabase,nfp)
 		except:
 			print("ERROR: There was an error saving your data!")
