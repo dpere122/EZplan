@@ -1,32 +1,47 @@
 import datetime
-import pickle
 import os
 import tkinter as tk
 from tkinter import *
 import calendar
+import NoteManager
+import Note
 
 
 class AppFrame:
 	
 	def __init__(self):
-		now = datetime.datetime.now()
-		self.nm = NoteManager()
-		self.curYear = now.year
-		self.curMonth = now.month
+		self.now = datetime.datetime.now()
+		self.nm = NoteManager.NoteManager()
+		self.curYear = self.now.year
+		self.curMonth = self.now.month
 		self.isTaskWinOpen = False
 		self.window = tk.Tk()
 		self.window.title("EZPlanner")
-		self.window.geometry("840x600")
+		self.window.geometry("840x700")
+		self.window.iconbitmap(r"planner\images\cal_icon.ico")
+		self.window.attributes('-topmost',0)
+		# ALL COMPONENTS RESIZE BUT ARE NOT UPDATED UNTIL THEY ARE REGENERATED(POSSIBLE FEATURE) 
 		self.window.resizable(width=False,height=False)
-		self.banner = tk.Frame(self.window,borderwidth = 2, relief = "solid")
+		self.banner = tk.Frame(self.window)
 		self.banner.pack(fill = X)
-		self.btnLeft = tk.Button(self.banner,text = "<-", command = lambda: self.validateDate(-1))
-		self.btnLeft.pack(side = LEFT)
-		self.btnRight = tk.Button(self.banner,text = "->",command = lambda: self.validateDate(1))
-		self.btnRight.pack(side = RIGHT)
+		self.btnLeft = tk.Button(self.banner,text = "<-",font = ("Courier",20),relief = "groove", command = lambda: self.validateDate(-1))
+		self.btnLeft.pack(side = LEFT,fill = Y)
+		self.btnRight = tk.Button(self.banner,text = "->",font = ("Courier",20),relief = "groove",command = lambda: self.validateDate(1))
+		self.btnRight.pack(side = RIGHT, fill = Y)
+		self.weekDays = tk.Frame(self.window,borderwidth = 1, relief = "solid")
+		self.weekDays.pack(fill = X)
 		self.genCalendar(self.curYear,self.curMonth)
+		# gen labels for days of the week
+		self.window.update()
+		fWidth = self.window.winfo_width()
+		cellWidth = int((fWidth / 7))
+		weekDaysList = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+		for x in range(len(weekDaysList)):
+			weekDayLabel = self.make_label(self.weekDays,0,x,h = 20,w = cellWidth,relief = "groove",borderwidth = 1,text = "{}".format(weekDaysList[x]))
+
 		self.window.mainloop()
 
+	# Button action to delete past cells and generate new month cells
 	def validateDate(self, interval):
 		self.frame.destroy()
 		self.calLabel.destroy()
@@ -44,35 +59,40 @@ class AppFrame:
 	def genCalendar(self,year,month):
 		self.labels = []
 		self.frame = tk.Frame(self.window)
-		self.calLabel = tk.Label(self.banner,anchor = CENTER,text = "{} : {}".format(calendar.month_name[month],str(self.curYear)),height = 2,font = ("Ariel",25))
+		self.calLabel = tk.Label(self.banner,anchor = CENTER,text = "{} : {}".format(calendar.month_name[month],str(self.curYear)),height = 2,font = ("Ariel",20))
 		self.calLabel.pack(side = TOP)
 		self.frame.pack(fill = BOTH)		
 		self.frame.update()
 		self.banner.update()
-		fWidth = self.frame.winfo_width()
-		fHeight = self.window.winfo_height() - self.banner.winfo_height()
+		self.weekDays.update()
+		fWidth = self.window.winfo_width()
+		fHeight = self.window.winfo_height() - self.banner.winfo_height() - self.weekDays.winfo_height()
 		cellWidth = (fWidth / 7)
 		cellHeight = (fHeight / 6)
+
 		counter = 0
-		# make this dynamic
 		start,totalDays = calendar.monthrange(year,month)
-		# print("start: "+ str(start)+" totalDays: "+ str(totalDays))
 		offCounter = 0
-		# print(self.window.winfo_height())
+		curDate = datetime.datetime(self.now.year,self.now.month,self.now.day)
+
+		# creates cells for each day of the month
 		for x in range(0,6):
 			for y in range(0,7):
-				label = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "grey",borderwidth = 2,relief="solid",anchor = 'ne')
+				# Labels packed inside frames due to a resizing issue
+				label = self.make_label(self.frame,x,y,h = cellHeight,w = cellWidth,bg = "white",borderwidth = 2,relief="groove",anchor = 'ne',justify = RIGHT,wraplength=110)
+				
 				if(offCounter > start and counter < totalDays):
-					label.config(bg = "#336699")
 					self.labels.append(label)
 					counter +=1	
+					offDate = datetime.datetime(self.curYear,self.curMonth,counter)
+					if(curDate > offDate):
+						label.config(bg = "grey")
 
 
 				offCounter += 1
-		# Refresh labels for printing text
 		self.refreshLabels()
 		
-
+	# Responisble for changing the text of each cell according to the notemanager and tasks for each item in the dictionary
 	def refreshLabels(self):
 		counter = 0
 		for label in self.labels:
@@ -87,7 +107,7 @@ class AppFrame:
 
 
 
-
+	# creates labels packed inside frame
 	def make_label(self,master, x, y, h, w, *args, **kwargs):
 		f = Frame(master,height = h,width = w)
 		f.pack_propagate(0) # don't shrink
@@ -96,13 +116,14 @@ class AppFrame:
 		label.pack(fill=BOTH, expand=1)
 		return label	
 	
-
+	# task window to add or delete tasks
 	def taskWindow(self,event,date):
 		if(self.isTaskWinOpen == False):
 			self.isTaskWinOpen = True
 			self.taskWin = Toplevel(self.window)
 			self.taskWin.protocol("WM_DELETE_WINDOW", self.taskClosed)
-			self.taskWin.geometry("300x230")
+			self.taskWin.geometry("300x220")
+			self.taskWin.iconbitmap(r"planner\images\cal_icon.ico")
 			self.taskWin.resizable(width=False,height=False)
 			self.taskWin.update()
 			self.buttonFrame = tk.Frame(self.taskWin)
@@ -117,24 +138,26 @@ class AppFrame:
 			self.taskInput.grid(row = 0, column = 1)
 			self.submit.grid(row = 1, column = 0)
 			self.delete.grid(row = 1, column = 1)
+			self.taskWin.attributes('-topmost',1)
 			if(date in self.nm.noteDatabase.keys()):
 				for item in self.nm.noteDatabase.get(date).tasks:
 					self.listBox.insert(END, item)
 		print("TASK WINDOW OPENED")
-
+	# Ensures theres only one task window open at a time
 	def taskClosed(self):
 		print("TASK WAS CLOSED")
 		self.isTaskWinOpen = False
 		self.taskWin.destroy()
-		
+	# Add tasks while changing our database file
 	def addTask(self,date):
 		if(self.taskInput.get() != ""):
 			taskText = self.taskInput.get()
 			self.nm.addNote(taskText,date)
 			self.listBox.insert(END,taskText)
 			self.refreshLabels()
+			self.taskInput.delete(0,'end')
 
-
+	# Deletes a task while updating our database file
 	def delTask(self,date):
 		selection = self.listBox.curselection()
 		taskText = self.listBox.get(selection)
@@ -142,76 +165,5 @@ class AppFrame:
 			self.nm.delNote(date,taskText)
 			self.listBox.delete(selection)
 			self.refreshLabels()
-
-
-
-
-
-# There needs to be a way to save notes and be able to easily change the labels based on the data
-class NoteManager:
-
-
-	def __init__(self):
-		try:
-			with open(filePath,'rb') as fp:
-				self.noteDatabase = pickle.load(fp)
-				print("Data file was successfuly loaded!")
-		except:
-			self.noteDatabase = {}
-			print("No file was loaded!")		
-
-	def addNote(self,taskText,date):
-		if(date in self.noteDatabase.keys()):
-			self.noteDatabase.get(date).tasks.append(taskText)
-		else:
-			note = Note(taskText)
-			self.noteDatabase.update({date:note})
-		self.modifyList()
-
-	# if there are no more tasks within a note class for a given date then delete that key/Value pair
-	def delNote(self,date,taskText):
-		if(date in self.noteDatabase.keys()):
-			if(taskText in self.noteDatabase.get(date).tasks):
-				self.noteDatabase.get(date).tasks.remove(taskText)
-			else: 
-				print("There was a problem finding and removing a task")
-			if(self.getDateTasks(date) == ""):
-				del(self.noteDatabase[date])
-		else:
-			print("There is no date within the noteDatabase")
-		self.modifyList()
-			
-	def getDateTasks(self,date):
-		taskStr = ""
-		if(date in self.noteDatabase.keys()):
-			for item in self.noteDatabase.get(date).tasks:
-				taskStr += "{}\n".format(item)
-		else:
-			print("That date isnt within the list of dates")
-		return taskStr
-
-
-	def modifyList(self):
-		try:
-			with open(filePath,"wb") as nfp:
-				pickle.dump(self.noteDatabase,nfp)
-		except:
-			print("ERROR: There was an error saving your data!")
-
-
-class Note:
-	def __init__(self, taskText):
-		self.tasks = []
-		self.tasks.append(taskText)
-
-	def getTaskList(self):
-		return self.tasks
-
-
-
-
-
-filePath = "data.dat"
-
 
 AppFrame()

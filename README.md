@@ -1,10 +1,8 @@
 # EZplan
-Simple command line note planner with basic commands.
+Simple lightweight calendar application made in python3 with a tkinter module GUI.
 
-## COMMANDS
-- 'create Note_Text'
-- 'delete ID'
-- 'list'
-  
-DISCLAIMER:
-This is my first python program..
+## Features:
+- Accounts for leap years
+- Integrated task system
+- Persistant task data between sessions
+- Easy to use GUI
